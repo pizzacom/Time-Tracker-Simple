@@ -1228,6 +1228,15 @@ function initTimePickers() {
         const isHour = id.includes('Hour');
         const max = isHour ? 23 : 59;
         
+        // Track if user is actively typing (not just focusing on pre-filled value)
+        let userTypedChars = 0;
+        
+        // Reset counter when field gains focus
+        input.addEventListener('focus', (e) => {
+            userTypedChars = 0;
+            e.target.select();
+        });
+        
         // Only allow numbers
         input.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
@@ -1246,9 +1255,25 @@ function initTimePickers() {
             syncTimeInputs('desktop');
         });
         
-        // Auto-jump to next field
+        // Auto-jump to next field only after user types 2 characters
+        input.addEventListener('keydown', (e) => {
+            // Count actual character keys (digits)
+            if (/^[0-9]$/.test(e.key)) {
+                // If text is selected (freshly focused), reset counter as it will be replaced
+                if (input.selectionStart === 0 && input.selectionEnd === input.value.length && input.value.length > 0) {
+                    userTypedChars = 0;
+                }
+            }
+        });
+        
         input.addEventListener('keyup', (e) => {
-            if (e.target.value.length === 2 && !e.key.includes('Arrow') && e.key !== 'Tab' && e.key !== 'Backspace') {
+            // Only count digit keys
+            if (/^[0-9]$/.test(e.key)) {
+                userTypedChars++;
+            }
+            
+            // Only auto-jump if user typed 2 characters themselves
+            if (userTypedChars >= 2 && e.target.value.length === 2 && !e.key.includes('Arrow') && e.key !== 'Tab' && e.key !== 'Backspace') {
                 const inputs = timeInputs.map(i => document.getElementById(i));
                 const currentIndex = inputs.indexOf(e.target);
                 if (currentIndex < inputs.length - 1) {
@@ -1256,11 +1281,6 @@ function initTimePickers() {
                     inputs[currentIndex + 1].select();
                 }
             }
-        });
-        
-        // Select all on focus
-        input.addEventListener('focus', (e) => {
-            e.target.select();
         });
     });
     

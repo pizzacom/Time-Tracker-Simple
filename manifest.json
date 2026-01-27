@@ -1,0 +1,41 @@
+{
+    "name": "Zeit Tracking App",
+    "short_name": "ZeitTrack",
+    "description": "Moderne Zeiterfassung für Profis - Erfassen, Analysieren und Exportieren Sie Ihre Arbeitszeiten",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#4f46e5",
+    "orientation": "portrait-primary",
+    "scope": "./",
+    "lang": "de-DE",
+    "categories": ["productivity", "utilities", "business"],
+    "icons": [
+        {
+            "src": "icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Timer starten",
+            "short_name": "Timer",
+            "description": "Zeiterfassung starten",
+            "url": "./index.html?action=timer"
+        },
+        {
+            "name": "Neuer Eintrag",
+            "short_name": "Eintrag",
+            "description": "Manuellen Zeiteintrag erstellen",
+            "url": "./index.html?action=entry"
+        },
+        {
+            "name": "Berichte",
+            "short_name": "Berichte",
+            "description": "Monatsberichte anzeigen",
+            "url": "./index.html?action=reports"
+        }
+    ]
+}

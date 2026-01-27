@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Zeit Tracking App - Moderne Zeiterfassung">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ZeitTrack">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <title>Zeit Tracking App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">
+                    <span class="logo">⏱️</span>
+                    <span data-i18n="appTitle">Zeit Tracking</span>
+                </h1>
+            </div>
+            <div class="header-right">
+                <button id="langToggle" class="icon-btn" title="Sprache wechseln">
+                    <span id="langIcon">🇩🇪</span>
+                </button>
+                <button id="themeToggle" class="icon-btn" title="Theme wechseln">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button id="settingsBtn" class="icon-btn" title="Einstellungen">
+                    <span>⚙️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="timer">
+                <span class="tab-icon">⏱️</span>
+                <span data-i18n="tabTimer">Timer</span>
+            </button>
+            <button class="tab-btn" data-tab="calendar">
+                <span class="tab-icon">📅</span>
+                <span data-i18n="tabCalendar">Kalender</span>
+            </button>
+            <button class="tab-btn" data-tab="reports">
+                <span class="tab-icon">📊</span>
+                <span data-i18n="tabReports">Berichte</span>
+            </button>
+            <button class="tab-btn" data-tab="data">
+                <span class="tab-icon">💾</span>
+                <span data-i18n="tabData">Daten</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Timer Tab -->
+            <section id="timer-tab" class="tab-content active">
+                <div class="timer-container">
+                    <div class="timer-display">
+                        <div id="timerTime" class="timer-time">00:00:00</div>
+                        <div id="timerStatus" class="timer-status" data-i18n="timerStopped">Gestoppt</div>
+                    </div>
+                    
+                    <div class="timer-description">
+                        <input type="text" id="taskDescription" class="input-field" 
+                               data-i18n-placeholder="taskPlaceholder" placeholder="Aufgabenbeschreibung (optional)">
+                    </div>
+
+                    <div class="timer-controls">
+                        <button id="startStopBtn" class="btn btn-primary btn-large">
+                            <span id="startStopIcon">▶️</span>
+                            <span id="startStopText" data-i18n="start">Start</span>
+                        </button>
+                        <button id="resetBtn" class="btn btn-secondary" disabled>
+                            <span>🔄</span>
+                            <span data-i18n="reset">Zurücksetzen</span>
+                        </button>
+                    </div>
+
+                    <div id="timerInfo" class="timer-info hidden">
+                        <p><span data-i18n="startedAt">Gestartet um:</span> <span id="startTimeDisplay">--:--</span></p>
+                    </div>
+                </div>
+
+                <!-- Today's Entries -->
+                <div class="today-entries">
+                    <h3 data-i18n="todayEntries">Heutige Einträge</h3>
+                    <div id="todayEntriesList" class="entries-list">
+                        <p class="no-entries" data-i18n="noEntries">Keine Einträge für heute</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Tab -->
+            <section id="calendar-tab" class="tab-content">
+                <div class="calendar-header">
+                    <button id="prevMonth" class="btn btn-icon">◀</button>
+                    <h2 id="currentMonth" class="month-title">Januar 2026</h2>
+                    <button id="nextMonth" class="btn btn-icon">▶</button>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="calendar-weekdays">
+                        <span data-i18n="weekdayMo">Mo</span>
+                        <span data-i18n="weekdaySu">Di</span>
+                        <span data-i18n="weekdayMo">Mi</span>
+                        <span data-i18n="weekdayTh">Do</span>
+                        <span data-i18n="weekdayFr">Fr</span>
+                        <span data-i18n="weekdaySa">Sa</span>
+                        <span data-i18n="weekdaySu">So</span>
+                    </div>
+                    <div id="calendarDays" class="calendar-days"></div>
+                </div>
+
+                <div class="selected-date-entries">
+                    <div class="date-header">
+                        <h3 id="selectedDateTitle" data-i18n="selectDate">Datum auswählen</h3>
+                        <button id="addEntryBtn" class="btn btn-primary btn-small">
+                            <span>➕</span>
+                            <span data-i18n="addEntry">Eintrag hinzufügen</span>
+                        </button>
+                    </div>
+                    <div id="selectedDateEntries" class="entries-list">
+                        <p class="no-entries" data-i18n="selectDateHint">Klicken Sie auf ein Datum im Kalender</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Tab -->
+            <section id="reports-tab" class="tab-content">
+                <div class="reports-header">
+                    <div class="report-month-selector">
+                        <button id="prevReportMonth" class="btn btn-icon">◀</button>
+                        <h2 id="reportMonth" class="month-title">Januar 2026</h2>
+                        <button id="nextReportMonth" class="btn btn-icon">▶</button>
+                    </div>
+                </div>
+
+                <div class="report-summary">
+                    <div class="summary-card">
+                        <span class="summary-icon">📅</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="totalDays">0</span>
+                            <span class="summary-label" data-i18n="workDays">Arbeitstage</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon">⏱️</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="totalHours">0:00</span>
+                            <span class="summary-label" data-i18n="totalHours">Gesamtstunden</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon">☕</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="totalBreaks">0:00</span>
+                            <span class="summary-label" data-i18n="totalBreaks">Pausenzeit</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon">📈</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="avgHours">0:00</span>
+                            <span class="summary-label" data-i18n="avgPerDay">Ø pro Tag</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="date">Datum</th>
+                                <th data-i18n="startTime">Start</th>
+                                <th data-i18n="endTime">Ende</th>
+                                <th data-i18n="breakTime">Pause</th>
+                                <th data-i18n="workTime">Arbeitszeit</th>
+                                <th data-i18n="description">Beschreibung</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="report-actions">
+                    <button id="exportPdfBtn" class="btn btn-primary">
+                        <span>📄</span>
+                        <span data-i18n="exportPdf">PDF exportieren</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Data Tab -->
+            <section id="data-tab" class="tab-content">
+                <div class="data-section">
+                    <h3 data-i18n="exportData">Daten exportieren</h3>
+                    <p class="section-description" data-i18n="exportDescription">Exportieren Sie Ihre Zeitdaten als Backup oder zur Verwendung in anderen Anwendungen.</p>
+                    <div class="button-group">
+                        <button id="exportJsonBtn" class="btn btn-secondary">
+                            <span>📦</span>
+                            <span data-i18n="exportJson">JSON exportieren</span>
+                        </button>
+                        <button id="exportCsvBtn" class="btn btn-secondary">
+                            <span>📊</span>
+                            <span data-i18n="exportCsv">CSV exportieren</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3 data-i18n="importData">Daten importieren</h3>
+                    <p class="section-description" data-i18n="importDescription">Importieren Sie Zeitdaten aus einer JSON-Datei.</p>
+                    
+                    <div class="import-options">
+                        <label class="radio-label">
+                            <input type="radio" name="importMode" value="merge" checked>
+                            <span data-i18n="mergeMode">Zusammenführen (Duplikate vermeiden)</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="importMode" value="replace">
+                            <span data-i18n="replaceMode">Ersetzen (alle Daten überschreiben)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" id="importFile" accept=".json" class="file-input">
+                        <label for="importFile" class="btn btn-secondary file-label">
+                            <span>📁</span>
+                            <span data-i18n="selectFile">Datei auswählen</span>
+                        </label>
+                        <span id="fileName" class="file-name" data-i18n="noFileSelected">Keine Datei ausgewählt</span>
+                    </div>
+                    
+                    <button id="importBtn" class="btn btn-primary" disabled>
+                        <span>📥</span>
+                        <span data-i18n="importBtn">Importieren</span>
+                    </button>
+                </div>
+
+                <div class="data-section danger-zone">
+                    <h3 data-i18n="dangerZone">Gefahrenzone</h3>
+                    <p class="section-description" data-i18n="deleteWarning">Achtung: Diese Aktion kann nicht rückgängig gemacht werden!</p>
+                    <button id="deleteAllBtn" class="btn btn-danger">
+                        <span>🗑️</span>
+                        <span data-i18n="deleteAll">Alle Daten löschen</span>
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="settings">Einstellungen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="userName">Name</label>
+                        <input type="text" id="userName" class="input-field" 
+                               data-i18n-placeholder="userNamePlaceholder" placeholder="Ihr Name">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="companyName">Firma</label>
+                        <input type="text" id="companyName" class="input-field" 
+                               data-i18n-placeholder="companyPlaceholder" placeholder="Firmenname (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="defaultBreak">Standard-Pausenzeit (Minuten)</label>
+                        <input type="number" id="defaultBreak" class="input-field" value="30" min="0" max="120">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveSettings" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Modal -->
+        <div id="entryModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="entryModalTitle" data-i18n="addEntry">Eintrag hinzufügen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="date">Datum</label>
+                        <input type="date" id="entryDate" class="input-field">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="startTime">Startzeit</label>
+                            <!-- Desktop: Custom text input time picker -->
+                            <div class="custom-time-picker desktop-only">
+                                <input type="text" id="entryStartHour" class="time-input" maxlength="2" placeholder="09" value="09">
+                                <span class="time-separator">:</span>
+                                <input type="text" id="entryStartMin" class="time-input" maxlength="2" placeholder="00" value="00">
+                            </div>
+                            <!-- Mobile: Native time picker -->
+                            <input type="time" id="entryStartMobile" class="input-field mobile-time-picker mobile-only" value="09:00">
+                            <input type="hidden" id="entryStart" value="09:00">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="endTime">Endzeit</label>
+                            <!-- Desktop: Custom text input time picker -->
+                            <div class="custom-time-picker desktop-only">
+                                <input type="text" id="entryEndHour" class="time-input" maxlength="2" placeholder="17" value="17">
+                                <span class="time-separator">:</span>
+                                <input type="text" id="entryEndMin" class="time-input" maxlength="2" placeholder="00" value="00">
+                            </div>
+                            <!-- Mobile: Native time picker -->
+                            <input type="time" id="entryEndMobile" class="input-field mobile-time-picker mobile-only" value="17:00">
+                            <input type="hidden" id="entryEnd" value="17:00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="breakMinutes">Pause (Minuten)</label>
+                        <input type="number" id="entryBreak" class="input-field" value="30" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="description">Beschreibung</label>
+                        <input type="text" id="entryDescription" class="input-field" 
+                               data-i18n-placeholder="descriptionPlaceholder" placeholder="Beschreibung (optional)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveEntry" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div id="confirmModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 id="confirmTitle" data-i18n="confirm">Bestätigen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="confirmAction" class="btn btn-danger" data-i18n="confirm">Bestätigen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="app.js"></script>
+</body>
+</html>

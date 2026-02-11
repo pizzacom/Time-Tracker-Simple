@@ -571,7 +571,7 @@ function saveEntry() {
         return;
     }
     
-    // Validate that start time is before or equal to end time
+    // Validate that start time is before end time
     const startMinutes = parseTimeToMinutes(startTime);
     const endMinutes = parseTimeToMinutes(endTime);
     if (startMinutes > endMinutes) {

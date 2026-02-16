@@ -102,11 +102,12 @@ sudo chown $USER:$USER /opt/zeittracker
 
 ## 4. Transfer the Project
 
-### Option A: Git Clone (if you have an internal Git repo)
+### Option A: Git Clone
 
 ```bash
-cd /opt/zeittracker
-git clone https://your-git-server.com/zeittracker.git .
+cd /opt
+git clone -b Testing https://github.com/pizzacom/Time-Tracker-Simple.git zeittracker
+cd zeittracker
 ```
 
 ### Option B: Copy from Dev Machine

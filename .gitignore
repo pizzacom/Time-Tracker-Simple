@@ -1,0 +1,54 @@
+# ===========================
+# ZeitTracker .gitignore
+# ===========================
+
+# ── Environment & Secrets ────────────────────
+.env
+*.env.local
+
+# ── Python ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ── Virtual Environments ─────────────────────
+.venv/
+venv/
+env/
+
+# ── Docker ───────────────────────────────────
+# Never commit database volumes or runtime data
+pgdata/
+
+# ── Backups (keep out of repo) ───────────────
+backups/
+*.sql.gz
+
+# ── IDE / Editor ─────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Testing / Coverage ──────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# ── OS Files ─────────────────────────────────
+.DS_Store
+Desktop.ini
+ehthumbs.db
+
+# ── Misc ─────────────────────────────────────
+*.log
+pyrightconfig.json

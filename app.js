@@ -90,7 +90,9 @@ const translations = {
         pdfWorkdays: 'Arbeitstage',
         noEntriesForMonth: 'Keine Einträge für diesen Monat',
         hours: 'Stunden',
-        minutes: 'Minuten'
+        minutes: 'Minuten',
+        errorFillAllFields: 'Bitte füllen Sie alle Pflichtfelder aus',
+        errorInvalidTimeRange: 'Startzeit muss vor der Endzeit liegen'
     },
     en: {
         appTitle: 'Time Tracking',
@@ -176,7 +178,9 @@ const translations = {
         pdfWorkdays: 'Work Days',
         noEntriesForMonth: 'No entries for this month',
         hours: 'hours',
-        minutes: 'minutes'
+        minutes: 'minutes',
+        errorFillAllFields: 'Please fill in all required fields',
+        errorInvalidTimeRange: 'Start time must be before end time'
     }
 };
 
@@ -563,7 +567,15 @@ function saveEntry() {
     const description = document.getElementById('entryDescription').value;
     
     if (!date || !startTime || !endTime) {
-        showToast('Bitte füllen Sie alle Pflichtfelder aus', 'error');
+        showToast(t('errorFillAllFields'), 'error');
+        return;
+    }
+    
+    // Validate that start time is before or equal to end time
+    const startMinutes = parseTimeToMinutes(startTime);
+    const endMinutes = parseTimeToMinutes(endTime);
+    if (startMinutes > endMinutes) {
+        showToast(t('errorInvalidTimeRange'), 'error');
         return;
     }
     
@@ -1206,10 +1218,6 @@ function initEventListeners() {
 // ==========================================
 // Custom Time Picker
 // ==========================================
-function isMobileView() {
-    return window.matchMedia('(max-width: 768px)').matches;
-}
-
 function initTimePickers() {
     // Set default values for desktop inputs
     document.getElementById('entryStartHour').value = '09';
@@ -1263,6 +1271,10 @@ function initTimePickers() {
                 if (input.selectionStart === 0 && input.selectionEnd === input.value.length && input.value.length > 0) {
                     userTypedChars = 0;
                 }
+            }
+            // Reset counter on backspace/delete to restart typing count
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                userTypedChars = 0;
             }
         });
         

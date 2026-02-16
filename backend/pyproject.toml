@@ -1,0 +1,17 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+filterwarnings = [
+    # 3rd-party: python-jose calls datetime.utcnow() internally
+    "ignore:datetime.datetime.utcnow:DeprecationWarning:jose",
+    # 3rd-party: passlib uses deprecated crypt module
+    "ignore:'crypt' is deprecated:DeprecationWarning:passlib",
+    # 3rd-party: openpyxl calls datetime.utcnow()
+    "ignore:datetime.datetime.utcnow:DeprecationWarning:openpyxl",
+    # 3rd-party: reportlab uses deprecated ast.NameConstant
+    "ignore:ast.NameConstant is deprecated:DeprecationWarning:reportlab",
+    # 3rd-party: pydantic class-based config
+    "ignore:Support for class-based `config`:DeprecationWarning:pydantic",
+    # SQLAlchemy circular FK sort warning (departments ↔ users)
+    "ignore:Cannot correctly sort tables:sqlalchemy.exc.SAWarning",
+]

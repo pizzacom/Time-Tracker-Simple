@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Zeit Tracking App - Moderne Zeiterfassung">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ZeitTrack">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <title>Zeit Tracking App</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">
+                    <span class="logo">⏱️</span>
+                    <span data-i18n="appTitle">Zeit Tracking</span>
+                </h1>
+                <span id="userDisplay" class="user-display"></span>
+            </div>
+            <div class="header-right">
+                <button id="langToggle" class="icon-btn" data-i18n-title="switchLanguage" title="Sprache wechseln">
+                    <span id="langIcon">🇩🇪</span>
+                </button>
+                <button id="themeToggle" class="icon-btn" data-i18n-title="switchTheme" title="Theme wechseln">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button id="settingsBtn" class="icon-btn" data-i18n-title="settingsTitle" title="Einstellungen">
+                    <span>⚙️</span>
+                </button>
+                <span id="sessionTimer" class="session-timer" data-i18n-title="sessionRenew" title="Klicken um Session zu verlängern">--:--</span>
+                <button id="logoutBtn" class="icon-btn" data-i18n-title="logoutTitle" title="Abmelden" style="display:none">
+                    <span>🚪</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="timer">
+                <span class="tab-icon">⏱️</span>
+                <span data-i18n="tabTimer">Timer</span>
+            </button>
+            <button class="tab-btn" data-tab="calendar">
+                <span class="tab-icon">📅</span>
+                <span data-i18n="tabCalendar">Kalender</span>
+            </button>
+            <button class="tab-btn" data-tab="reports">
+                <span class="tab-icon">📊</span>
+                <span data-i18n="tabReports">Berichte</span>
+            </button>
+            <button class="tab-btn" data-tab="overtime">
+                <span class="tab-icon">⏰</span>
+                <span data-i18n="tabOvertime">Überstunden</span>
+            </button>
+            <button class="tab-btn" data-tab="data">
+                <span class="tab-icon">💾</span>
+                <span data-i18n="tabData">Daten</span>
+            </button>
+            <button class="tab-btn" data-tab="admin" style="display:none">
+                <span class="tab-icon">👑</span>
+                <span data-i18n="tabAdmin">Verwaltung</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Timer Tab -->
+            <section id="timer-tab" class="tab-content active">
+                <div class="timer-container">
+                    <div class="timer-display">
+                        <div id="timerTime" class="timer-time">00:00:00</div>
+                        <div id="timerStatus" class="timer-status" data-i18n="timerStopped">Gestoppt</div>
+                    </div>
+                    <div class="timer-description">
+                        <input type="text" id="taskDescription" class="input-field"
+                               data-i18n-placeholder="taskPlaceholder" placeholder="Aufgabenbeschreibung (optional)">
+                    </div>
+                    <div class="timer-controls">
+                        <button id="startStopBtn" class="btn btn-primary btn-large">
+                            <span id="startStopIcon">▶️</span>
+                            <span id="startStopText" data-i18n="start">Start</span>
+                        </button>
+                        <button id="resetBtn" class="btn btn-secondary" disabled>
+                            <span>🔄</span>
+                            <span data-i18n="reset">Zurücksetzen</span>
+                        </button>
+                    </div>
+                    <div id="timerInfo" class="timer-info hidden">
+                        <p><span data-i18n="startedAt">Gestartet um:</span> <span id="startTimeDisplay">--:--</span></p>
+                    </div>
+                </div>
+                <div class="today-entries">
+                    <h3 data-i18n="todayEntries">Heutige Einträge</h3>
+                    <div id="todayEntriesList" class="entries-list">
+                        <p class="no-entries" data-i18n="noEntries">Keine Einträge für heute</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Tab -->
+            <section id="calendar-tab" class="tab-content">
+                <div class="calendar-header">
+                    <button id="prevMonth" class="btn btn-icon">◀</button>
+                    <h2 id="currentMonth" class="month-title">Januar 2026</h2>
+                    <button id="nextMonth" class="btn btn-icon">▶</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-weekdays">
+                        <span data-i18n="weekdayMo">Mo</span>
+                        <span data-i18n="weekdayTu">Di</span>
+                        <span data-i18n="weekdayWe">Mi</span>
+                        <span data-i18n="weekdayTh">Do</span>
+                        <span data-i18n="weekdayFr">Fr</span>
+                        <span data-i18n="weekdaySa">Sa</span>
+                        <span data-i18n="weekdaySu">So</span>
+                    </div>
+                    <div id="calendarDays" class="calendar-days"></div>
+                </div>
+                <div class="selected-date-entries">
+                    <div class="date-header">
+                        <h3 id="selectedDateTitle" data-i18n="selectDate">Datum auswählen</h3>
+                        <button id="addEntryBtn" class="btn btn-primary btn-small">
+                            <span>➕</span>
+                            <span data-i18n="addEntry">Eintrag hinzufügen</span>
+                        </button>
+                    </div>
+                    <div id="selectedDateEntries" class="entries-list">
+                        <p class="no-entries" data-i18n="selectDateHint">Klicken Sie auf ein Datum im Kalender</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Tab -->
+            <section id="reports-tab" class="tab-content">
+                <div class="reports-header">
+                    <div class="report-month-selector">
+                        <button id="prevReportMonth" class="btn btn-icon">◀</button>
+                        <h2 id="reportMonth" class="month-title">Januar 2026</h2>
+                        <button id="nextReportMonth" class="btn btn-icon">▶</button>
+                    </div>
+                </div>
+                <div class="report-summary">
+                    <div class="summary-card">
+                        <span class="summary-icon">📅</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="totalDays">0</span>
+                            <span class="summary-label" data-i18n="workDays">Arbeitstage</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon">⏱️</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="totalHours">0:00</span>
+                            <span class="summary-label" data-i18n="totalHours">Gesamtstunden</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon">☕</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="totalBreaks">0:00</span>
+                            <span class="summary-label" data-i18n="totalBreaks">Pausenzeit</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-icon">📈</span>
+                        <div class="summary-content">
+                            <span class="summary-value" id="avgHours">0:00</span>
+                            <span class="summary-label" data-i18n="avgPerDay">Ø pro Tag</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="reportOvertimeSummary" class="report-summary"></div>
+                <div class="report-table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="date">Datum</th>
+                                <th data-i18n="startTime">Start</th>
+                                <th data-i18n="endTime">Ende</th>
+                                <th data-i18n="breakTime">Pause</th>
+                                <th data-i18n="sollMinutes">Soll</th>
+                                <th data-i18n="istMinutes">Ist</th>
+                                <th data-i18n="delta">Delta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="report-actions">
+                    <button id="exportPdfBtn" class="btn btn-primary">
+                        <span>📄</span>
+                        <span data-i18n="exportPdf">PDF exportieren</span>
+                    </button>
+                    <button id="exportExcelBtn" class="btn btn-secondary">
+                        <span>📊</span>
+                        <span data-i18n="exportExcel">Excel exportieren</span>
+                    </button>
+                    <button id="exportCsvBtn" class="btn btn-secondary">
+                        <span>📋</span>
+                        <span data-i18n="exportCsv">CSV exportieren</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Overtime Tab -->
+            <section id="overtime-tab" class="tab-content">
+                <div class="overtime-section">
+                    <div class="overtime-balance-card">
+                        <h3 data-i18n="overtimeBalance">Überstunden-Saldo</h3>
+                        <div id="overtimeBalanceValue" class="overtime-balance-value positive">0:00</div>
+                        <button id="useOvertimeBtn" class="btn btn-secondary btn-small">
+                            <span>📉</span>
+                            <span data-i18n="overtimeUse">Überstunden abbauen</span>
+                        </button>
+                    </div>
+
+                    <div class="overtime-history-section">
+                        <h3 data-i18n="overtimeHistory">Verlauf</h3>
+                        <div id="overtimeHistoryList" class="overtime-history-list">
+                            <p class="no-entries" data-i18n="loading">Laden...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absences-section">
+                    <h3 data-i18n="vacationBudget">Urlaubskonto</h3>
+                    <div id="vacationBudgetDisplay"></div>
+
+                    <div class="absence-header">
+                        <h3 data-i18n="absences">Abwesenheiten</h3>
+                        <button id="addAbsenceBtn" class="btn btn-primary btn-small">
+                            <span>➕</span>
+                            <span data-i18n="addAbsence">Abwesenheit eintragen</span>
+                        </button>
+                    </div>
+                    <div id="absencesList" class="absences-list">
+                        <p class="no-entries" data-i18n="loading">Laden...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Tab -->
+            <section id="data-tab" class="tab-content">
+                <!-- User Selection (leaders/admins only) -->
+                <div id="dataUserSelectSection" class="data-section" style="display: none;">
+                    <h3 data-i18n="selectUser">Benutzer auswählen</h3>
+                    <div class="form-group">
+                        <div class="styled-select-wrapper">
+                            <select id="dataUserSelect" class="input-field styled-select">
+                                <option value="" data-i18n="myData">Meine Daten</option>
+                            </select>
+                            <span class="styled-select-arrow">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 8.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Section -->
+                <div class="data-section">
+                    <h3 data-i18n="exportData">Daten exportieren</h3>
+                    <p class="section-description" data-i18n="exportDescription">Exportieren Sie Ihre Zeitdaten in verschiedenen Formaten.</p>
+                    <div class="button-group">
+                        <button id="exportPdfBtn2" class="btn btn-secondary">
+                            <span>📄</span>
+                            <span data-i18n="exportPdf">PDF exportieren</span>
+                        </button>
+                        <button id="exportExcelBtn2" class="btn btn-secondary">
+                            <span>📊</span>
+                            <span data-i18n="exportExcel">Excel exportieren</span>
+                        </button>
+                        <button id="exportCsvBtn2" class="btn btn-secondary">
+                            <span>📋</span>
+                            <span data-i18n="exportCsv">CSV exportieren</span>
+                        </button>
+                    </div>
+                    <div class="button-group" style="margin-top: 0.75rem;">
+                        <button id="exportJsonBtn" class="btn btn-secondary">
+                            <span>💾</span>
+                            <span data-i18n="exportJson">JSON exportieren</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Import Section -->
+                <div class="data-section">
+                    <h3 data-i18n="importData">Daten importieren</h3>
+                    <p class="section-description" data-i18n="importDescription">Importieren Sie Zeitdaten aus einer JSON-Datei.</p>
+                    <div class="import-controls">
+                        <label for="importJsonFile" class="btn btn-secondary file-label">
+                            <span>📂</span>
+                            <span data-i18n="selectFile">Datei auswählen</span>
+                        </label>
+                        <input type="file" id="importJsonFile" accept=".json" hidden />
+                        <span id="importFileName" class="file-name" data-i18n="noFileSelected">Keine Datei ausgewählt</span>
+                    </div>
+                    <div class="import-options" style="margin-top: 0.5rem;">
+                        <label class="radio-label">
+                            <input type="radio" name="importMode" value="merge" checked />
+                            <span data-i18n="mergeMode">Zusammenführen (Duplikate vermeiden)</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="importMode" value="replace" />
+                            <span data-i18n="replaceMode">Ersetzen (alle Daten überschreiben)</span>
+                        </label>
+                    </div>
+                    <button id="importJsonBtn" class="btn btn-primary" style="margin-top: 0.75rem;">
+                        <span>📥</span>
+                        <span data-i18n="importBtn">Importieren</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Admin Tab -->
+            <section id="admin-tab" class="tab-content">
+                <!-- Users Management -->
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h3 data-i18n="adminUsers">Benutzer</h3>
+                        <button id="addUserBtn" class="btn btn-primary btn-small">
+                            <span>➕</span>
+                            <span data-i18n="addUser">Benutzer anlegen</span>
+                        </button>
+                    </div>
+                    <div id="adminUsersList" class="admin-list">
+                        <p class="no-entries" data-i18n="loading">Laden...</p>
+                    </div>
+                </div>
+
+                <!-- Departments Management -->
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h3 data-i18n="adminDepartments">Abteilungen</h3>
+                        <button id="addDeptBtn" class="btn btn-primary btn-small">
+                            <span>➕</span>
+                            <span data-i18n="addDepartment">Abteilung anlegen</span>
+                        </button>
+                    </div>
+                    <div id="adminDeptsList" class="admin-list">
+                        <p class="no-entries" data-i18n="loading">Laden...</p>
+                    </div>
+                </div>
+
+                <!-- Holidays Management -->
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h3 data-i18n="adminHolidays">Feiertage</h3>
+                        <div class="header-btn-group">
+                            <button id="autoGenHolidaysBtn" class="btn btn-secondary btn-small">
+                                <span>🔄</span>
+                                <span data-i18n="autoGenerate">Auto-Generieren</span>
+                            </button>
+                            <button id="addHolidayBtn" class="btn btn-primary btn-small">
+                                <span>➕</span>
+                                <span data-i18n="addHoliday">Feiertag anlegen</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="adminHolidaysList" class="admin-list">
+                        <p class="no-entries" data-i18n="loading">Laden...</p>
+                    </div>
+                </div>
+
+                <!-- Backup & Restore (admin only) -->
+                <div class="admin-section" id="backupSection">
+                    <div class="admin-section-header">
+                        <h3>🗄️ Backup &amp; Restore</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem 0;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <button id="exportBackupBtn" class="btn btn-primary btn-small">
+                                <span>📥</span>
+                                <span data-i18n="backupExport">Datenbank-Backup exportieren</span>
+                            </button>
+                            <span class="text-secondary" style="font-size: 0.85rem;" data-i18n="backupExportDesc">Komplettes Datenbank-Backup als JSON herunterladen</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <label for="importBackupFile" class="btn btn-secondary btn-small" style="cursor: pointer; margin: 0;">
+                                <span>📤</span>
+                                <span data-i18n="backupImport">Datenbank-Backup importieren</span>
+                            </label>
+                            <input type="file" id="importBackupFile" accept=".json" style="display: none;">
+                            <span class="text-secondary" style="font-size: 0.85rem; color: var(--danger, #e74c3c);" data-i18n="backupImportWarning">ACHTUNG: Alle bestehenden Daten werden überschrieben!</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="settings">Einstellungen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="userName">Name</label>
+                        <input type="text" id="userNameSetting" class="input-field"
+                               data-i18n-placeholder="userNamePlaceholder" placeholder="Ihr Name" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="companyName">Firma</label>
+                        <input type="text" id="companyName" class="input-field"
+                               data-i18n-placeholder="companyPlaceholder" placeholder="Firmenname (optional)">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="defaultBreak">Standard-Pausenzeit (Minuten)</label>
+                        <input type="number" id="defaultBreak" class="input-field" value="30" min="0" max="120">
+                    </div>
+                    <hr style="margin: 1rem 0; border-color: var(--border);">
+                    <button id="openChangePasswordBtn" class="btn btn-secondary" style="width: 100%;" data-i18n="changePassword">Passwort ändern</button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveSettings" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password Modal -->
+        <div id="changePasswordModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-i18n="changePassword">Passwort ändern</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="currentPassword">Aktuelles Passwort</label>
+                        <input type="password" id="currentPasswordInput" class="input-field" autocomplete="current-password">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="newPassword">Neues Passwort</label>
+                        <input type="password" id="newPasswordInput" class="input-field" minlength="6" autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="confirmNewPassword">Neues Passwort bestätigen</label>
+                        <input type="password" id="confirmPasswordInput" class="input-field" minlength="6" autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="submitChangePassword" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry Modal -->
+        <div id="entryModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="entryModalTitle" data-i18n="addEntry">Eintrag hinzufügen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label data-i18n="date">Datum</label>
+                        <input type="date" id="entryDate" class="input-field">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="startTime">Startzeit</label>
+                            <div class="custom-time-picker desktop-only">
+                                <input type="text" id="entryStartHour" class="time-input" maxlength="2" placeholder="09" value="09">
+                                <span class="time-separator">:</span>
+                                <input type="text" id="entryStartMin" class="time-input" maxlength="2" placeholder="00" value="00">
+                            </div>
+                            <input type="time" id="entryStartMobile" class="input-field mobile-time-picker mobile-only" value="09:00">
+                            <input type="hidden" id="entryStart" value="09:00">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="endTime">Endzeit</label>
+                            <div class="custom-time-picker desktop-only">
+                                <input type="text" id="entryEndHour" class="time-input" maxlength="2" placeholder="17" value="17">
+                                <span class="time-separator">:</span>
+                                <input type="text" id="entryEndMin" class="time-input" maxlength="2" placeholder="00" value="00">
+                            </div>
+                            <input type="time" id="entryEndMobile" class="input-field mobile-time-picker mobile-only" value="17:00">
+                            <input type="hidden" id="entryEnd" value="17:00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="breakMinutes">Pause (Minuten)</label>
+                        <input type="number" id="entryBreak" class="input-field" value="30" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="description">Beschreibung</label>
+                        <input type="text" id="entryDescription" class="input-field"
+                               data-i18n-placeholder="descriptionPlaceholder" placeholder="Beschreibung (optional)">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveEntry" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div id="confirmModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 id="confirmTitle" data-i18n="confirm">Bestätigen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="confirmAction" class="btn btn-danger" data-i18n="confirm">Bestätigen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Use Overtime Modal -->
+        <div id="useOvertimeModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 data-i18n="overtimeUse">Überstunden abbauen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="useOvertimeForm">
+                        <div class="form-group">
+                            <label data-i18n="date">Datum</label>
+                            <input type="date" id="otUseDate" class="input-field" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="overtimeMinutes">Minuten</label>
+                            <input type="number" id="otUseMinutes" class="input-field" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="overtimeNote">Notiz</label>
+                            <input type="text" id="otUseNote" class="input-field" placeholder="">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="submitUseOvertime" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Absence Modal -->
+        <div id="addAbsenceModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 data-i18n="addAbsence">Abwesenheit eintragen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAbsenceForm">
+                        <div class="form-group">
+                            <label data-i18n="date">Datum</label>
+                            <input type="date" id="absDate" class="input-field" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="absenceType">Typ</label>
+                            <select id="absType" class="input-field" required>
+                                <option value="urlaub" data-i18n="vacation">Urlaub</option>
+                                <option value="krank" data-i18n="sick">Krank</option>
+                                <option value="sonderurlaub" data-i18n="specialLeave">Sonderurlaub</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="submitAddAbsence" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Modal (Admin) -->
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="userModalTitle" data-i18n="addUser">Benutzer anlegen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="form-group">
+                            <label data-i18n="email">E-Mail</label>
+                            <input type="email" id="userEmail" class="input-field" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label data-i18n="firstName">Vorname</label>
+                                <input type="text" id="userFirstName" class="input-field" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="lastName">Nachname</label>
+                                <input type="text" id="userLastName" class="input-field" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="password">Passwort</label>
+                            <input type="password" id="userPassword" class="input-field">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label data-i18n="role">Rolle</label>
+                                <select id="userRole" class="input-field">
+                                    <option value="worker" data-i18n="roleWorker">Mitarbeiter</option>
+                                    <option value="abteilungsleiter" data-i18n="roleLeader">Abteilungsleiter</option>
+                                    <option value="admin" data-i18n="roleAdmin">Administrator</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="department">Abteilung</label>
+                                <select id="userDepartment" class="input-field">
+                                    <option value="">--</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="userActive" checked>
+                                <span data-i18n="active">Aktiv</span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveUserBtn" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Modal -->
+        <div id="deptModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 id="deptModalTitle" data-i18n="addDepartment">Abteilung anlegen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="deptForm">
+                        <input type="hidden" id="deptId">
+                        <div class="form-group">
+                            <label data-i18n="departmentName">Name</label>
+                            <input type="text" id="deptName" class="input-field" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveDeptBtn" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Holiday Modal -->
+        <div id="holidayModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2 data-i18n="addHoliday">Feiertag anlegen</h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="holidayForm">
+                        <div class="form-group">
+                            <label data-i18n="holidayDate">Datum</label>
+                            <input type="date" id="holidayDate" class="input-field" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="holidayName">Bezeichnung</label>
+                            <input type="text" id="holidayNameInput" class="input-field" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="holidayHalfDay">
+                                <span data-i18n="halfDay">Halber Tag</span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveHolidayBtn" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Modal -->
+        <div id="scheduleModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🕐 <span data-i18n="scheduleTitle">Soll-Arbeitszeit</span>: <span id="scheduleUserName"></span></h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="scheduleUserId">
+                    <div class="form-group">
+                        <label data-i18n="validFrom">Gültig ab</label>
+                        <input type="date" id="schedValidFrom" class="input-field">
+                    </div>
+                    <p class="modal-hint" data-i18n="scheduleHint">Minuten pro Tag eingeben (z.B. 480 = 8h)</p>
+                    <div class="schedule-grid">
+                        <div class="form-group"><label data-i18n="monday">Montag</label><input type="number" id="schedMon" class="input-field" value="480" min="0" max="720"></div>
+                        <div class="form-group"><label data-i18n="tuesday">Dienstag</label><input type="number" id="schedTue" class="input-field" value="480" min="0" max="720"></div>
+                        <div class="form-group"><label data-i18n="wednesday">Mittwoch</label><input type="number" id="schedWed" class="input-field" value="480" min="0" max="720"></div>
+                        <div class="form-group"><label data-i18n="thursday">Donnerstag</label><input type="number" id="schedThu" class="input-field" value="480" min="0" max="720"></div>
+                        <div class="form-group"><label data-i18n="friday">Freitag</label><input type="number" id="schedFri" class="input-field" value="480" min="0" max="720"></div>
+                        <div class="form-group"><label data-i18n="saturday">Samstag</label><input type="number" id="schedSat" class="input-field" value="0" min="0" max="720"></div>
+                        <div class="form-group"><label data-i18n="sunday">Sonntag</label><input type="number" id="schedSun" class="input-field" value="0" min="0" max="720"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveScheduleBtn" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vacation Budget Modal -->
+        <div id="vacationModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>🏖️ <span data-i18n="vacationTitle">Urlaubstage</span>: <span id="vacUserName"></span></h2>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="vacUserId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="year">Jahr</label>
+                            <input type="number" id="vacYear" class="input-field" min="2020" max="2099">
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="totalDays">Gesamttage</label>
+                            <input type="number" id="vacTotalDays" class="input-field" value="30" min="0" max="365">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-close-modal data-i18n="cancel">Abbrechen</button>
+                    <button id="saveVacationBtn" class="btn btn-primary" data-i18n="save">Speichern</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete User Confirmation Modal -->
+        <div id="deleteUserModal" class="modal">
+            <div class="modal-content" style="max-width:400px">
+                <div class="modal-header">
+                    <h3 data-i18n="deleteTitle">Löschen</h3>
+                    <button class="modal-close" data-close-modal>&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteUserMsg"></p>
+                </div>
+                <div class="modal-footer" style="flex-direction:column;gap:0.5rem">
+                    <button id="deactivateUserBtn" class="btn btn-secondary btn-block" data-i18n="deactivate">Deaktivieren</button>
+                    <button id="hardDeleteUserBtn" class="btn btn-danger btn-block" data-i18n="hardDelete">Endgültig löschen</button>
+                    <button class="btn btn-ghost btn-block" data-close-modal data-i18n="cancel">Abbrechen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

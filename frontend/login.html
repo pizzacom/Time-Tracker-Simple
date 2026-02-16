@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Zeit Tracking App - Login">
+    <meta name="theme-color" content="#4f46e5">
+    <title>Zeit Tracking - Login</title>
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <span class="login-logo">⏱️</span>
+                <h1 data-i18n="appTitle">Zeit Tracking</h1>
+                <p class="login-subtitle" data-i18n="loginTitle">Anmelden</p>
+            </div>
+
+            <form id="loginForm" class="login-form" autocomplete="on">
+                <div class="form-group">
+                    <label for="loginEmail" data-i18n="loginEmail">E-Mail</label>
+                    <input type="email" id="loginEmail" class="input-field" required
+                           autocomplete="email" placeholder="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" data-i18n="loginPassword">Passwort</label>
+                    <input type="password" id="loginPassword" class="input-field" required
+                           autocomplete="current-password" placeholder="••••••••">
+                </div>
+
+                <div id="loginError" class="login-error hidden"></div>
+
+                <button type="submit" id="loginBtn" class="btn btn-primary btn-large btn-full">
+                    <span data-i18n="loginButton">Anmelden</span>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <button id="loginLangToggle" class="icon-btn" title="Language">
+                    <span id="loginLangIcon">🇩🇪</span>
+                </button>
+                <button id="loginThemeToggle" class="icon-btn" title="Theme">
+                    <span id="loginThemeIcon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './js/auth.js';
+        import { t, loadLanguage, setLanguage, getLanguage, updateDOMTranslations } from './js/i18n.js';
+        import { saveLocal, loadLocal, showToast } from './js/utils.js';
+
+        let theme = loadLocal('theme', 'light') || 'light';
+        loadLanguage();
+
+        function updateTheme() {
+            document.body.setAttribute('data-theme', theme);
+            const icon = document.getElementById('loginThemeIcon');
+            if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+
+        function updateLangIcon() {
+            const icon = document.getElementById('loginLangIcon');
+            if (icon) icon.textContent = getLanguage() === 'de' ? '🇩🇪' : '🇬🇧';
+        }
+
+        // Check if already logged in
+        auth.init().then(loggedIn => {
+            if (loggedIn) window.location.href = 'index.html';
+        });
+
+        updateTheme();
+        updateLangIcon();
+        updateDOMTranslations();
+
+        document.getElementById('loginThemeToggle')?.addEventListener('click', () => {
+            theme = theme === 'light' ? 'dark' : 'light';
+            saveLocal('theme', theme);
+            updateTheme();
+        });
+
+        document.getElementById('loginLangToggle')?.addEventListener('click', () => {
+            setLanguage(getLanguage() === 'de' ? 'en' : 'de');
+            updateLangIcon();
+            updateDOMTranslations();
+        });
+
+        document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail')?.value;
+            const password = document.getElementById('loginPassword')?.value;
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
+
+            if (!email || !password) return;
+
+            btn.disabled = true;
+            errorEl.classList.add('hidden');
+
+            try {
+                await auth.login(email, password);
+                window.location.href = 'index.html';
+            } catch (err) {
+                errorEl.textContent = err.message || t('loginError');
+                errorEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
